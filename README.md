@@ -49,7 +49,7 @@ cp inventory.example.ini inventory.ini
 
 Open `inventory.ini` and specify the real IP address of your QNX server and the username. **Do not add the password to this file.**
 
-## ▶Running the Playbook
+## Running the Playbook
 
 Execute the following command to start the deployment. The `-k` (or `--ask-pass`) flag will force Ansible to securely prompt for the QNX server password in the terminal:
 
