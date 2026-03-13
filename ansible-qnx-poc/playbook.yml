@@ -1,0 +1,7 @@
+---
+- name: Bare QNX 7.1 Software Recipe Deployment
+  hosts: qnx_servers
+  gather_facts: false
+
+  roles:
+    - qnx_recipe

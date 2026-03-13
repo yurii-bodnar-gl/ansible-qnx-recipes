@@ -1,0 +1,51 @@
+---
+- name: 1. Download real app locally on Ubuntu (Workbench)
+  delegate_to: localhost
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh"
+    dest: "/tmp/acme.sh"
+    mode: '0644'
+
+- name: 2. Generate installer script with embedded app
+  delegate_to: localhost
+  ansible.builtin.copy:
+    dest: "/tmp/simple_install.sh"
+    mode: '0755'
+    content: |
+      #!/bin/sh
+      set -e
+
+      INSTALL_DIR="$HOME/real_app"
+      BIN_PATH="$INSTALL_DIR/acme.sh"
+
+      echo "=> Creating folder $INSTALL_DIR..."
+      mkdir -p "$INSTALL_DIR"
+
+      echo "=> Extracting acme.sh to QNX file system..."
+      cat << 'EOF' > "$BIN_PATH"
+      {{ lookup('file', '/tmp/acme.sh') }}
+      EOF
+
+      echo "=> Setting execution permissions..."
+      chmod +x "$BIN_PATH"
+
+      echo "=> Running the program to verify:"
+      "$BIN_PATH" --version
+
+- name: 3. Execute installer directly on QNX target
+  ansible.builtin.script:
+    cmd: "/tmp/simple_install.sh"
+  register: qnx_recipe_install_result
+
+- name: 4. Display execution output
+  ansible.builtin.debug:
+    var: qnx_recipe_install_result.stdout_lines
+
+- name: 5. Clean up local files
+  delegate_to: localhost
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/simple_install.sh"
+    - "/tmp/acme.sh"
